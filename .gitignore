@@ -1,0 +1,12 @@
+﻿__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.pytest_cache/
+.DS_Store
+
+# Uploaded datasets
+data/*.csv
+data/*.xlsx
+!data/.gitkeep
