@@ -24,6 +24,16 @@ REQUIRED_COLUMNS = [
 #  FILE I/O
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def _find_valid_sheet(xls: pd.ExcelFile) -> pd.DataFrame:
+    for sheet_name in xls.sheet_names:
+        df = pd.read_excel(xls, sheet_name=sheet_name)
+        present = set(c.strip().lower() for c in df.columns)
+        missing = [col for col in REQUIRED_COLUMNS if col.lower() not in present]
+        if not missing:
+            return df
+    return pd.read_excel(xls, sheet_name=0)
+
+
 def load_uploaded_file(uploaded_file) -> pd.DataFrame:
     """
     Read an uploaded file (CSV or XLSX) into a DataFrame.
@@ -33,7 +43,8 @@ def load_uploaded_file(uploaded_file) -> pd.DataFrame:
     if name.endswith(".csv"):
         return pd.read_csv(uploaded_file)
     elif name.endswith(".xlsx") or name.endswith(".xls"):
-        return pd.read_excel(uploaded_file, engine="openpyxl")
+        xls = pd.ExcelFile(uploaded_file, engine="openpyxl")
+        return _find_valid_sheet(xls)
     else:
         raise ValueError(f"Unsupported file format: {name}. Please upload a .csv or .xlsx file.")
 
@@ -47,7 +58,8 @@ def load_file_from_path(file_path: str) -> pd.DataFrame:
     if ext == ".csv":
         return pd.read_csv(file_path)
     elif ext in (".xlsx", ".xls"):
-        return pd.read_excel(file_path, engine="openpyxl")
+        xls = pd.ExcelFile(file_path, engine="openpyxl")
+        return _find_valid_sheet(xls)
     else:
         raise ValueError(f"Unsupported file format: {ext}")
 
@@ -105,6 +117,7 @@ def clean_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     """
     warnings: list[str] = []
     original_len = len(df)
+    warnings.append(f"original row count: {original_len}")
 
     # --- Normalize column names ---
     df = normalize_column_names(df.copy())
@@ -123,31 +136,32 @@ def clean_dataframe(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
         invalid_dates = df["date"].isna().sum()
         if invalid_dates > 0:
-            warnings.append(f"{invalid_dates} row(s) with invalid/missing dates were removed.")
+            warnings.append(f"rows removed due to invalid date: {invalid_dates}")
             df = df.dropna(subset=["date"])
+        else:
+            warnings.append("rows removed due to invalid date: 0")
+    else:
+        warnings.append("rows removed due to invalid date: 0")
 
     # --- Parse severity column ---
     if "severity" in df.columns:
-        df["severity"] = pd.to_numeric(df["severity"], errors="coerce")
-        invalid_sev = df["severity"].isna().sum()
-        if invalid_sev > 0:
-            warnings.append(f"{invalid_sev} row(s) with non-numeric severity were removed.")
-            df = df.dropna(subset=["severity"])
-
+        df["severity"] = pd.to_numeric(df["severity"], errors="coerce").fillna(0)
         df["severity"] = df["severity"].astype(int)
 
-        # Enforce 1–10 range
-        out_of_range = ((df["severity"] < 1) | (df["severity"] > 10)).sum()
+        # Enforce 0–10 range
+        out_of_range = ((df["severity"] < 0) | (df["severity"] > 10)).sum()
         if out_of_range > 0:
             warnings.append(
-                f"{out_of_range} row(s) with severity outside the 1-10 range were excluded."
+                f"rows removed due to invalid severity range: {out_of_range}"
             )
-            df = df[(df["severity"] >= 1) & (df["severity"] <= 10)]
+            df = df[(df["severity"] >= 0) & (df["severity"] <= 10)]
+        else:
+            warnings.append("rows removed due to invalid severity range: 0")
+    else:
+        warnings.append("rows removed due to invalid severity range: 0")
 
-    # --- Summary ---
-    dropped = original_len - len(df)
-    if dropped > 0:
-        warnings.append(f"Total rows removed during cleaning: {dropped} / {original_len}.")
+    warnings.append(f"remaining row count: {len(df)}")
+    warnings.append("optional empty fields filled as Unknown or empty string")
 
     df = df.reset_index(drop=True)
     return df, warnings

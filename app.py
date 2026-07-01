@@ -286,7 +286,7 @@ if df_raw is None and load_error is None:
                 <li><code>target_sector</code> &mdash; targeted sector</li>
                 <li><code>attack_vector</code> &mdash; attack vector used</li>
                 <li><code>technique</code> &mdash; MITRE ATT&amp;CK technique</li>
-                <li><code>severity</code> &mdash; integer between 1 and 10</li>
+                <li><code>severity</code> &mdash; integer between 0 and 10</li>
                 <li><code>ioc_ip</code> &mdash; indicator IP address</li>
                 <li><code>ioc_hash</code> &mdash; indicator SHA-256 hash</li>
             </ul>
@@ -372,8 +372,8 @@ with st.sidebar:
     max_sev = int(df_clean["severity"].max())
     sev_range = st.slider(
         "Severity Range",
-        min_value=min_sev,
-        max_value=max_sev,
+        min_value=0,
+        max_value=10,
         value=(min_sev, max_sev),
         key="filter_severity",
     )
