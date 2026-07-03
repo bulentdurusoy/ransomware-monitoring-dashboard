@@ -186,18 +186,7 @@ ransomware-monitoring-dashboard/
 
 ---
 
-## Ekran Goruntuleri
 
-> _Ekran goruntuleri daha sonra buraya eklenecektir._
-
-<!--
-![Hosgeldin Ekrani](screenshots/welcome.png)
-![Dashboard Genel Bakis](screenshots/overview.png)
-![Grafik Ornekleri](screenshots/charts.png)
-![IOC Arama](screenshots/ioc_search.png)
--->
-
----
 
 ## Lisans
 
