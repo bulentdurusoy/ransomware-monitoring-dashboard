@@ -200,3 +200,26 @@ Bu proje egitim ve demonstrasyon amaclidir.
 - Yalnizca kullanicinin yukledigi CSV veya XLSX dosyalari analiz edilir.
 - Docker kullanarak uygulamayi herhangi bir ortamda calistirabilirsiniz.
 - `src/data_generator.py` dosyasi yalnizca test amacli veri uretimi icin saklanmistir; dashboard tarafindan otomatik olarak cagrilmaz.
+
+
+## Veri Kaynağı Açıklaması
+
+Bu projede kullanılan veri seti, açık kaynaklardan toplanan ransomware olaylarına ait bilgiler kullanılarak hazırlanmıştır. Ana veri kaynağı olarak **ransomware.live** platformundan yararlanılmıştır. Bu platform üzerinden ransomware grupları, hedef alınan kurumlar, saldırı tarihleri, ülke bilgileri ve sektör bilgileri incelenmiştir.
+
+Veri setindeki ek teknik bilgiler ise internet üzerinde yapılan detaylı açık kaynak araştırmaları sonucunda elde edilmiştir. IOC bilgileri, hash değerleri, IP adresleri, TTP’ler, saldırı vektörleri ve MITRE ATT&CK teknikleri; siber güvenlik haberleri, tehdit istihbaratı raporları, güvenlik blogları ve olay analizleri incelenerek manuel olarak derlenmiştir.
+
+Toplanan veriler proje kapsamında temizlenmiş, standartlaştırılmış ve dashboard üzerinde kullanılabilecek hale getirilmiştir. Farklı kaynaklardan elde edilen bilgiler tek bir Excel dosyasında birleştirilmiş ve aşağıdaki alanlara göre düzenlenmiştir:
+
+- date
+- ransomware_group
+- country
+- target_sector
+- attack_vector
+- technique
+- severity
+- ioc_ip
+- ioc_hash
+
+MITRE ATT&CK teknikleri ve saldırı vektörleri, olay açıklamalarında geçen teknik detaylara göre eşleştirilmiştir. IOC ve hash bilgileri yalnızca açık kaynaklarda erişilebildiği durumlarda eklenmiştir. Bazı olaylarda tüm teknik detaylara ulaşılamadığı için ilgili alanlar eksik bırakılmış veya yalnızca doğrulanabilen bilgiler kullanılmıştır.
+
+Bu veri seti eğitim, analiz ve ransomware olaylarını görselleştirme amacıyla hazırlanmıştır. Veriler açık kaynaklardan elde edilmiş olup herhangi bir gizli, özel veya yetkisiz bilgi içermemektedir.
